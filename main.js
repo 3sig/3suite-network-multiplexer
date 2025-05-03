@@ -261,12 +261,12 @@ function handleRequest(req, res, method) {
     }
 
 
-    // sort the bundled requests by their bundleOrder
     let bundleOrder = req.headers["3suite-bundle-order"]
       ? parseInt(req.headers["3suite-bundle-order"])
       : null;
     serverConnection.bundleOrder = bundleOrder;
 
+    // sort the bundled request by its bundleOrder
     if (serverConnection.bundleOrder != null) {
       let insertionFound = false;
       for (let i = 0; i < bundledRequests[bundleId].length; i++) {
