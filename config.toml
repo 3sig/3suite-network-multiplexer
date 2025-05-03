@@ -1,12 +1,11 @@
 destinationServers = [
-  "192.168.1.144:3000",
-  "192.168.1.133:3000",
-  "192.168.1.158:3000",
+  "localhost:2001",
+  "localhost:2002",
+  "localhost:2003",
 ]
 maximumRequestsPerServer = 1
 randomizeDestinationServer = false
-requestDebounceTime = 500
+requestDebounceTime = 1000
 
-port = "2995"
-
+port = 2000
 useHttps = false

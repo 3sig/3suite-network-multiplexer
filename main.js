@@ -184,7 +184,7 @@ function getAvailableServerIndex() {
   return minimumIndex;
 }
 
-let waitingForDebounce = false;
+let waitingForDebounce = 0;
 function addToQueue(callback) {
   requestQueue.push(callback);
 
@@ -192,13 +192,21 @@ function addToQueue(callback) {
   // immediately, waiting instead for a configurable amount of time.
   // this gives clients time to send in higher priority requests
   // before starting long jobs.
+  //
+  // we keep track of how many requests triggered debounce logic
+  // to make sure we spawn enough processQueue calls
   if (!waitingForDebounce) {
-    waitingForDebounce = true;
+    waitingForDebounce = 1;
     (async () => {
       await sleep(config.get("requestDebounceTime", 0));
-      waitingForDebounce = false;
-      processQueue();
+      for (; waitingForDebounce > 0;  waitingForDebounce--) {
+        processQueue();
+      }
+      waitingForDebounce = 0;
     })();
+  }
+  else {
+    waitingForDebounce += 1;
   }
 }
 
@@ -252,6 +260,8 @@ function handleRequest(req, res, method) {
       bundledRequests[bundleId] = [];
     }
 
+
+    // sort the bundled requests by their bundleOrder
     let bundleOrder = req.headers["3suite-bundle-order"]
       ? parseInt(req.headers["3suite-bundle-order"])
       : null;
@@ -281,6 +291,7 @@ function handleRequest(req, res, method) {
       bundledRequests[bundleId].push(serverConnection);
     }
 
+    // TODO: setup timeouts for bundles to clear them from the server
     console.log("adding to bundle", bundleId, bundledRequests[bundleId].length);
 
     let bundleSize = parseInt(req.headers["3suite-bundle-size"] || "0");

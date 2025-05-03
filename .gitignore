@@ -1,3 +1,6 @@
+# test binaries
+3suite-*
+
 # Logs
 logs
 *.log
