@@ -1,35 +1,17 @@
-# 3suite
+# 3suite-network-multiplexer
 
-this repository serves as a template for 3suite projects. as of writing, it includes:
+network-multiplexer groups multiple identical HTTP endpoints under a single URL. it allows distributing HTTP requests to multiple servers, limiting concurrent requests per server.
 
-- 3lib-config setup
-- workflow actions for automated building and releasing via tags
+network-multiplexer is primarily useful for scenarios where arbitrary horizontal scaling is needed--especially when nodes can only handle a single request at once.
 
 ## usage
 
-### creating a new project
+most settings should be self-evident from `config.toml`. for advanced configuration information, see [3lib-config](https://github.com/3sig/3lib-config)
 
-fork the repository--any changes that we make to the build workflows should be merged upstream to this template.
+network-multiplexer processes a range of headers from the input request as well. these headers will not be passed to the server if they are provided.
 
-enable workflows in github so that the build workflows can run.
-
-### creating a release
-
-ensure that you are in a fully committed state before creating a tag.
-you likely want to download and check the related build before tagging.
-
-create a tag:
-
-`git tag -a v1.0.0 -m "release v1.0.0"`
-
-the message inside of the quotes will be the release message.
-the version number will be appended to the output build files.
-
-push the tag:
-
-`git push origin tag v1.0.0`
-
-you DEFINITELY don't want to run `git push --tags` because it will trigger releases for tags across the history.
+- `3suite-priority`: sets the priority for this request in the queue. requests with higher priorities will be assigned empty slots first. the default priority is 0
+- `3suite-bundle-id`, `3suite-bundle-size`, `3suite-bundle-order`: use these headers to group requests if they are supposed to go to the same server. requests will be bundled by `3suite-bundle-id`, and only executed once the number of requests in the bundle reaches `3suite-bundle-size`. `3suite-bundle-order` dictates the order in which the requests will be executed, and is optional. if `3suite-bundle-order` is not provided, the requests will be executed in the order they were received.
 
 ### macOS builds
 

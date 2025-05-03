@@ -244,9 +244,7 @@ function handleRequest(req, res, method) {
     },
   };
 
-  if (config.get("usePriorityField", false)) {
-    serverConnection.priority = parseInt(req.headers["3suite-priority"] || "0");
-  }
+  serverConnection.priority = parseInt(req.headers["3suite-priority"] || "0");
 
   if (req.headers["3suite-bundle-id"]) {
     let bundleId = req.headers["3suite-bundle-id"];

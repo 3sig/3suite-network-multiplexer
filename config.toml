@@ -1,1 +1,12 @@
-test = "Hello World!"
+destinationServers = [
+  "192.168.1.144:3000",
+  "192.168.1.133:3000",
+  "192.168.1.158:3000",
+]
+maximumRequestsPerServer = 1
+randomizeDestinationServer = false
+requestDebounceTime = 500
+
+port = "2995"
+
+useHttps = false
