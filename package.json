@@ -4,6 +4,9 @@
   "main": "main.js",
   "type": "module",
   "dependencies": {
-    "3lib-config": "github:3sig/3lib-config"
+    "3lib-config": "github:3sig/3lib-config",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.2"
   }
 }
