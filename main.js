@@ -106,7 +106,7 @@ async function executeRequest(req, res, serverIndex, method) {
     response.headers.forEach((value, key) => {
       // Skip certain headers that Express will set
       if (
-        !["connection", "content-length", "transfer-encoding"].includes(
+        !["connection", "content-length", "transfer-encoding", "content-encoding"].includes(
           key.toLowerCase(),
         )
       ) {
@@ -292,7 +292,7 @@ function handleRequest(req, res, method) {
     }
 
     // TODO: setup timeouts for bundles to clear them from the server
-    console.log("adding to bundle", bundleId, bundledRequests[bundleId].length);
+    console.log("adding to bundle:", bundleId, "bundle length:", bundledRequests[bundleId].length);
 
     let bundleSize = parseInt(req.headers["3suite-bundle-size"] || "0");
     if (bundledRequests[bundleId].length == bundleSize) {
@@ -308,7 +308,7 @@ function handleRequest(req, res, method) {
       });
     }
   } else {
-    console.log("adding to queue:", serverConnection);
+    console.log("adding to queue with priority:", serverConnection.priority);
     addToQueue(serverConnection);
   }
 }
