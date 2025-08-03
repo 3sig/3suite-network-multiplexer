@@ -1,0 +1,14 @@
+{
+  destinationServers: [
+    "localhost:2001",
+    "localhost:2002",
+    "localhost:2003",
+  ],
+
+  maximumRequestsPerServer: 1,
+  randomizeDestinationServer: false,
+  requestDebounceTime: 1000,
+
+  port: 2000,
+  useHttps: false,
+}
