@@ -20,6 +20,7 @@ jobs:
       - run: bun install
       - run: bun build --compile --target=bun-windows-x64 main.js --outfile ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_win.exe
       - run: bun build --compile --target=bun-linux-x64 main.js --outfile ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux
+      - run: bun build --compile --target=bun-linux-arm64 main.js --outfile ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux-arm
       - run: bun build --compile --target=bun-darwin-arm64 main.js --outfile ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_osx-arm
       - run: bun build --compile --target=bun-darwin-x64 main.js --outfile ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_osx-x64
       - name: Fix Windows executable permissions
@@ -34,6 +35,11 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux
           path: ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux
+      - name: Upload linux-arm executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux-arm
+          path: ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux-arm
       - name: Upload macos-arm executable
         uses: actions/upload-artifact@v4
         with:
@@ -55,6 +61,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
       - run: mv ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux ${{ github.event.repository.name }}_${{ github.ref_name }}_linux
         if: startsWith(github.ref, 'refs/tags/')
+      - run: mv ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_linux-arm ${{ github.event.repository.name }}_${{ github.ref_name }}_linux-arm
+        if: startsWith(github.ref, 'refs/tags/')
       - run: mv ${{ github.event.repository.name }}_${{ env.COMMIT_SHORT_SHA }}_win.exe ${{ github.event.repository.name }}_${{ github.ref_name }}_win.exe
         if: startsWith(github.ref, 'refs/tags/')
       - run: |
@@ -70,5 +78,6 @@ jobs:
             ${{ github.event.repository.name }}_${{  github.ref_name }}_osx-arm
             ${{ github.event.repository.name }}_${{  github.ref_name }}_osx-x64
             ${{ github.event.repository.name }}_${{  github.ref_name }}_linux
+            ${{ github.event.repository.name }}_${{  github.ref_name }}_linux-arm
             ${{ github.event.repository.name }}_${{  github.ref_name }}_win.exe
             config.json5
