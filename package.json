@@ -1,8 +1,14 @@
 {
   "name": "3suite-template",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "main": "main.js",
   "type": "module",
+  "scripts": {
+    "release": "node .3suite-utils/version-and-tag.js",
+    "release:patch": "node .3suite-utils/version-and-tag.js patch",
+    "release:minor": "node .3suite-utils/version-and-tag.js minor",
+    "release:major": "node .3suite-utils/version-and-tag.js major"
+  },
   "dependencies": {
     "3lib-config": "github:3sig/3lib-config",
     "cors": "^2.8.5",
