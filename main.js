@@ -28,10 +28,14 @@ async function executeRequest(req, res, serverIndex, method) {
   serverConnectionCount[serverIndex] += 1;
 
   try {
-    console.log(
-      "executing request",
-      config.get("destinationServers")[serverIndex] + req.url,
-    );
+    const targetUrl = config.get("destinationServers")[serverIndex] + req.url;
+    console.log(`Request ${method} ${req.url} → ${config.get("destinationServers")[serverIndex]}`);
+    if (config.get("verbose")) {
+      console.log(`Full target URL: ${targetUrl}`);
+      console.log(`Headers: ${JSON.stringify(req.headers)}`);
+      console.log(`Body keys: ${req.body ? Object.keys(req.body) : 'none'}`);
+      console.log(`Server connection count: ${serverConnectionCount[serverIndex]}`);
+    }
     let modifiedHeaders = { ...req.headers };
 
     delete modifiedHeaders["content-length"];
@@ -123,7 +127,12 @@ async function executeRequest(req, res, serverIndex, method) {
 
     // handle errors in request
   } catch (e) {
-    console.log("Error processing request:", e);
+    console.log(`Request failed: ${method} ${req.url} - ${e.message}`);
+    if (config.get("verbose")) {
+      console.log(`Error details: ${e.name}`);
+      console.log(`Stack trace: ${e.stack}`);
+      console.log(`Server index: ${serverIndex}`);
+    }
 
     // Determine appropriate status code
     let statusCode = 500;
@@ -270,11 +279,9 @@ function handleRequest(req, res, method) {
     if (serverConnection.bundleOrder != null) {
       let insertionFound = false;
       for (let i = 0; i < bundledRequests[bundleId].length; i++) {
-        console.log(
-          "checking bundle order",
-          bundledRequests[bundleId][i].bundleOrder,
-          serverConnection.bundleOrder,
-        );
+        if (config.get("verbose")) {
+          console.log(`Bundle ${bundleId}: comparing order ${bundledRequests[bundleId][i].bundleOrder} vs ${serverConnection.bundleOrder}`);
+        }
         if (
           bundledRequests[bundleId][i].bundleOrder >
           serverConnection.bundleOrder
@@ -292,11 +299,16 @@ function handleRequest(req, res, method) {
     }
 
     // TODO: setup timeouts for bundles to clear them from the server
-    console.log("adding to bundle:", bundleId, "bundle length:", bundledRequests[bundleId].length);
+    if (config.get("verbose")) {
+      console.log(`Bundle ${bundleId}: added request (${bundledRequests[bundleId].length}/${bundleSize})`);
+    }
 
     let bundleSize = parseInt(req.headers["3suite-bundle-size"] || "0");
     if (bundledRequests[bundleId].length == bundleSize) {
-      console.log("adding bundle to queue", bundleId);
+      console.log(`Bundle complete: ${bundleId} (${bundleSize} requests) queued with priority ${serverConnection.priority}`);
+      if (config.get("verbose")) {
+        console.log(`Bundle ${bundleId} request URLs: ${bundledRequests[bundleId].map((req, i) => `${i}: order ${req.bundleOrder}`).join(', ')}`);
+      }
       addToQueue({
         callback: async (serverIndex) => {
           for (let i = 0; i < bundledRequests[bundleId].length; i++) {
@@ -308,7 +320,11 @@ function handleRequest(req, res, method) {
       });
     }
   } else {
-    console.log("adding to queue with priority:", serverConnection.priority);
+    console.log(`Request queued: ${method} ${req.url} (priority: ${serverConnection.priority})`);
+    if (config.get("verbose")) {
+      console.log(`Queue length: ${requestQueue.length + 1}`);
+      console.log(`Server connection counts: [${serverConnectionCount.join(', ')}]`);
+    }
     addToQueue(serverConnection);
   }
 }
@@ -331,5 +347,13 @@ app.options("*", (req, res) => {
 
 let port = config.get("port", 3000);
 app.listen(port, () => {
-  console.log(`3suite-network-multiplexer listening on port ${port}`);
+  console.log(`3suite-network-multiplexer started on port ${port}`);
+  console.log(`Destination servers: ${config.get("destinationServers").join(', ')}`);
+  if (config.get("verbose")) {
+    console.log(`Max requests per server: ${config.get("maximumRequestsPerServer", 1)}`);
+    console.log(`Randomize server selection: ${config.get("randomizeDestinationServer", false)}`);
+    console.log(`Request debounce time: ${config.get("requestDebounceTime", 0)}ms`);
+    console.log(`HTTPS enabled: ${config.get("useHttps", false)}`);
+    console.log(`Verbose logging: enabled`);
+  }
 });
